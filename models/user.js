@@ -22,5 +22,9 @@ module.exports = (sequelize) => {
     schema: 'my_forms'
   })
 
+  // const requestURL = 'https://trello.com/1/OAuthGetRequestToken'
+  // const accessURL = 'https://trello.com/1/OAuthGetAccessToken'
+  // const authorizeURL = 'https://trello.com/1/OAuthAuthorizeToken'
+
   return User
 }

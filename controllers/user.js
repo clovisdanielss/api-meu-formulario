@@ -33,5 +33,6 @@ module.exports = (app, db) => {
       next(err)
     })
   })
+
   app.use('/users', router)
 }

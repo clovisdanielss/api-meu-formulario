@@ -108,5 +108,13 @@ module.exports = (app, db) => {
       next(err)
     })
   })
+
+  /**
+  * A atualização de um formulário é a deleção do antigo
+  * e inserção do novo. Isso é menos custoso do que, buscar
+  * as componentes a serem atualizadas, e ademais
+  * buscar as questões a serem atualizadas.
+  */
+
   app.use('/users/:id/forms', router)
 }
