@@ -18,7 +18,7 @@ module.exports = (app, db) => {
     }
     User.findAll({
       where: dbQuery,
-      attributes: ['mail', 'id']
+      attributes: ['username', 'id']
     }).then((userS) => {
       res.status(200).json(userS)
     }).catch((err) => {
