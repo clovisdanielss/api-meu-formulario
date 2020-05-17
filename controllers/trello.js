@@ -45,7 +45,8 @@ module.exports = (app, db) => {
           response.map((lists) => {
             result.push({
               id: lists.id,
-              name: lists.name
+              name: lists.name,
+              idBoard: lists.idBoard
             })
           })
           res.json(result)

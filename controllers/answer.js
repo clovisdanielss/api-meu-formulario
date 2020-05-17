@@ -2,17 +2,22 @@ const express = require('express')
 const router = express.Router()
 const request = require('request')
 const superagent = require('superagent')
-
+const userModel = require('../models/user')
 module.exports = (app, db) => {
+  const User = userModel(db)
+
   // Erro quando faltar autorização
-  app.use('/answers', (req, res, next) => {
-    if (req.headers && req.headers.authorization) {
-      next()
-    } else {
-      const err = new Error('Sem autorização')
-      err.status = 300
-      next(err)
-    }
+  // Aqui jaz a importancia do link ser gerado randomizado.
+  router.all('', (req, res, next) => {
+    const dbQuery = { id: req.body.idUser }
+    User.findOne({ where: dbQuery })
+      .then((foundUser) => {
+        req.headers.authorization = foundUser.dataValues.lastToken
+        next()
+      })
+      .catch((err) => {
+        next(err)
+      })
   })
   /**
 
@@ -23,11 +28,12 @@ module.exports = (app, db) => {
         value:'...',
         type:'...',
         titleQuestion:'...',
-        titleForm:'...',
       },
       ...
     ],
-    idList: '...'
+    idList: '...',
+    title:'...'
+    idUser:'...'
   }
 
   **/
@@ -36,7 +42,7 @@ module.exports = (app, db) => {
     console.log('RespostaS: ', answers)
     var card = {
       idList: req.body.idList,
-      name: answers[0].titleForm,
+      name: req.body.title,
       desc: '',
       due: null
     }

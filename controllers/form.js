@@ -3,6 +3,7 @@ const router = express.Router()
 const formModel = require('../models/form')
 const componentModel = require('../models/component')
 const questionModel = require('../models/question')
+const crypto = require('crypto')
 
 module.exports = (app, db) => {
   const Form = formModel(db)
@@ -11,7 +12,7 @@ module.exports = (app, db) => {
 
   router.get('(/:id)?', (req, res, next) => {
     const query = req.query
-    if (query && query.full && req.params.id) {
+    if (!req.userParams || (query && query.full && req.params.id)) {
       return next()
     }
     const dbQuery = { idUser: req.userParams.id }
@@ -30,8 +31,9 @@ module.exports = (app, db) => {
     next()
   })
 
-  router.get('/:id', (req, res, next) => {
-    const dbQuery = { id: req.params.id }
+  // Deveria passar o link como query
+  router.get('/:link', (req, res, next) => {
+    const dbQuery = { link: req.params.link }
     Form.findOne({ where: dbQuery })
       .then((foundForm) => {
         var form = foundForm.dataValues
@@ -43,7 +45,7 @@ module.exports = (app, db) => {
       })
   })
 
-  router.get('/:id', (req, res, next) => {
+  router.get('/:link', (req, res, next) => {
     const dbQuery = { idForm: req.form.id }
     Question.findAll({ where: dbQuery })
       .then((foundQuestions) => {
@@ -62,7 +64,7 @@ module.exports = (app, db) => {
       })
   })
 
-  router.get('/:id', (req, res, next) => {
+  router.get('/:link', (req, res, next) => {
     const dbQuery = { idQuestion: req.qids }
     Component.findAll({ where: dbQuery })
       .then((foundComponents) => {
@@ -81,11 +83,24 @@ module.exports = (app, db) => {
       })
   })
 
+  // Checa se existe autorização
+  router.post('', (req, res, next) => {
+    if (req.headers && req.headers.authorization) {
+      next()
+    } else {
+      const err = new Error('Sem autorização')
+      err.status = 300
+      next(err)
+    }
+  })
+
   // Post e delete dividido em três parte, serviço começa deletando
   // as entidades dependentes até chegar no formulário.
   // Objeto totalmente aninhado. Form:{Question:{Components:{}}}
   router.post('', (req, res, next) => {
+    console.log(req.body)
     req.body.idUser = req.userParams.id
+    req.body.link = crypto.randomBytes(4).toString('hex') + req.body.idUser + crypto.randomBytes(2).toString('hex')
     Form.create(req.body).then((createdForm) => {
       var questions = []
       req.body.questions.map((question) => {
@@ -123,7 +138,6 @@ module.exports = (app, db) => {
   })
 
   router.post('', (req, res, next) => {
-    console.log(req.formResponse)
     var components = req.formResponse.toCreate
     Component.bulkCreate(components).then((createdComponents) => {
       req.formResponse.toResponse.components = createdComponents
@@ -131,6 +145,17 @@ module.exports = (app, db) => {
     }).catch((err) => {
       next(err)
     })
+  })
+
+  // Checa se existe autorização
+  router.delete('/:id', (req, res, next) => {
+    if (req.headers && req.headers.authorization) {
+      next()
+    } else {
+      const err = new Error('Sem autorização')
+      err.status = 300
+      next(err)
+    }
   })
 
   router.delete('/:id', (req, res, next) => {
@@ -179,5 +204,8 @@ module.exports = (app, db) => {
   * buscar as questões a serem atualizadas.
   */
 
+  // Específico para quem vai preencher o form.
+  app.use('/forms', router)
+  // Específico para serviços do usuário.
   app.use('/users/:id/forms', router)
 }

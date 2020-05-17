@@ -18,6 +18,7 @@ module.exports = (sequelize) => {
       type: Sequelize.STRING
     },
     link: {
+      unique: true,
       type: Sequelize.STRING
     },
     idList: {
