@@ -20,8 +20,8 @@ module.exports = (sequelize) => {
     link: {
       type: Sequelize.STRING
     },
-    trelloMail: {
-      field: 'trello_mail',
+    idList: {
+      field: 'id_list',
       type: Sequelize.STRING,
       allowNull: false
     }

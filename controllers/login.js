@@ -4,6 +4,7 @@ const request = require('request')
 const userModel = require('../models/user')
 
 module.exports = (app, db) => {
+  // Checa se existe autorização
   app.use('/logg*', (req, res, next) => {
     if (req.headers && req.headers.authorization) {
       next()
@@ -13,7 +14,7 @@ module.exports = (app, db) => {
       next(err)
     }
   })
-
+  // Encaminha para autorização do trello
   router.get('/login', (req, res, next) => {
     const authorization = 'https://trello.com/1/authorize?expiration=never&name=MeuFormulário&scope=read,write&response_type=token&key=' + process.env.TRELLO_KEY + '&return_url=' + process.env.FRONT
     res.json({
@@ -21,6 +22,8 @@ module.exports = (app, db) => {
     })
   })
 
+  // Após o usuário ser autorizado, o perfil do membro é retornado
+  // O novo token usado é salvo.
   router.get('/logged', (req, res, next) => {
     request('https://trello.com/1/members/me?key=' +
           process.env.TRELLO_KEY + '&token=' +

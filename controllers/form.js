@@ -10,6 +10,10 @@ module.exports = (app, db) => {
   const Question = questionModel(db)
 
   router.get('(/:id)?', (req, res, next) => {
+    const query = req.query
+    if (query && query.full && req.params.id) {
+      return next()
+    }
     const dbQuery = { idUser: req.userParams.id }
     if (req.params.id) {
       dbQuery.id = req.params.id
@@ -21,6 +25,65 @@ module.exports = (app, db) => {
     })
   })
 
+  router.all('/:id/*', (req, res, next) => {
+    req.formParams = req.params
+    next()
+  })
+
+  router.get('/:id', (req, res, next) => {
+    const dbQuery = { id: req.params.id }
+    Form.findOne({ where: dbQuery })
+      .then((foundForm) => {
+        var form = foundForm.dataValues
+        req.form = form
+        next()
+      })
+      .catch((err) => {
+        next(err)
+      })
+  })
+
+  router.get('/:id', (req, res, next) => {
+    const dbQuery = { idForm: req.form.id }
+    Question.findAll({ where: dbQuery })
+      .then((foundQuestions) => {
+        var questions = []
+        var questionsIds = []
+        foundQuestions.map((question, key) => {
+          questions.push(question.dataValues)
+          questionsIds.push(questions[key].id)
+        })
+        req.form.questions = questions
+        req.qids = questionsIds
+        next()
+      })
+      .catch((err) => {
+        next(err)
+      })
+  })
+
+  router.get('/:id', (req, res, next) => {
+    const dbQuery = { idQuestion: req.qids }
+    Component.findAll({ where: dbQuery })
+      .then((foundComponents) => {
+        req.form.questions.map((question) => {
+          var components = []
+          foundComponents.map((component) => {
+            if (component.dataValues.idQuestion === question.id) {
+              components.push(component)
+            }
+          })
+          question.components = components
+        })
+        res.json(req.form)
+      }).catch((err) => {
+        next(err)
+      })
+  })
+
+  // Post e delete dividido em três parte, serviço começa deletando
+  // as entidades dependentes até chegar no formulário.
+  // Objeto totalmente aninhado. Form:{Question:{Components:{}}}
   router.post('', (req, res, next) => {
     req.body.idUser = req.userParams.id
     Form.create(req.body).then((createdForm) => {

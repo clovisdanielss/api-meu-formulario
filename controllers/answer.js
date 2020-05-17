@@ -4,6 +4,7 @@ const request = require('request')
 const superagent = require('superagent')
 
 module.exports = (app, db) => {
+  // Erro quando faltar autorização
   app.use('/answers', (req, res, next) => {
     if (req.headers && req.headers.authorization) {
       next()
@@ -16,22 +17,25 @@ module.exports = (app, db) => {
   /**
 
   Uma resposta de formulário será da forma:
-  answers:[
-    {
-      value:'...',
-      type:'...',
-      titleQuestion:'...',
-      titleForm:'...',
-    },
-    ...
-  ]
+  {
+    answers:[
+      {
+        value:'...',
+        type:'...',
+        titleQuestion:'...',
+        titleForm:'...',
+      },
+      ...
+    ],
+    idList: '...'
+  }
 
   **/
   router.post('', (req, res, next) => {
-    const answers = req.body
+    const answers = req.body.answers
     console.log('RespostaS: ', answers)
     var card = {
-      idList: '5d79245ad4701d4233d61133',
+      idList: req.body.idList,
       name: answers[0].titleForm,
       desc: '',
       due: null

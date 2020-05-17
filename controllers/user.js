@@ -5,11 +5,12 @@ const userModel = require('../models/user')
 module.exports = (app, db) => {
   const User = userModel(db)
 
+  // Encaminhamento de parametros
   router.all('/:id/*', (req, res, next) => {
     req.userParams = req.params
     next()
   })
-
+  // Devolve todos usuarios/um único
   router.get('(/:id)?', (req, res, next) => {
     const User = userModel(db)
     const dbQuery = {}
@@ -25,7 +26,7 @@ module.exports = (app, db) => {
       next(err)
     })
   })
-
+  // Salva um usuário
   router.post('', (req, res, next) => {
     User.create(req.body).then((createdUser) => {
       res.status(201).json(createdUser)
