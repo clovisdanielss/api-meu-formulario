@@ -4,7 +4,7 @@ const cors = require('cors')
 const app = express()
 const dotenv = require('dotenv')
 const bp = require('body-parser')
-const router = require('./controllers/router')
+const router = require('./routes/router')
 
 // Reading .env file
 dotenv.config()
