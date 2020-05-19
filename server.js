@@ -22,6 +22,7 @@ app.mkdir = (path) => {
   })
 }
 
+console.log(__dirname)
 app.use(express.static(path.join(__dirname, 'public')))
 app.PORT = process.env.PORT || 8080
 app.URL = process.env.URI
