@@ -71,7 +71,7 @@ module.exports = (app, db) => {
             console.log('Arquivo salvo')
           }
         })
-        card.urlSource = path.join(process.env.THIS, name)
+        card.urlSource = process.env.THIS + '/' + name
       }
     })
     console.log('Card: ', card)
