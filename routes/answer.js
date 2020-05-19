@@ -43,6 +43,7 @@ module.exports = (app, db) => {
   router.post('', (req, res, next) => {
     const answers = req.body.answers
     const idUser = req.body.idUser.toString()
+    var files = []
     app.mkdir(path.join('public', idUser))
     var card = {
       idList: req.body.idList,
@@ -64,10 +65,8 @@ module.exports = (app, db) => {
       } else if (answer.type === 'date') {
         card.due = new Date(answer.value)
       } else {
-        var name = crypto.randomBytes(4).toString('hex')
-        var arr = answer.value.name.split('.')
-        var ext = '.' + arr[arr.length - 1]
-        name += ext
+        const name = answer.value.name.toLowerCase()
+
         var b = Buffer.from(answer.value.data)
 
         fs.writeFile(path.join('public', idUser, name), b, (err) => {
@@ -77,17 +76,38 @@ module.exports = (app, db) => {
             console.log('Arquivo salvo')
           }
         })
-        card.urlSource = process.env.THIS + '/' + path.join(idUser, name)
+        files.push({
+          url: process.env.THIS + '/' + path.join(idUser, name),
+          name: name
+        })
+        // card.urlSource = process.env.THIS + '/' + path.join(idUser, name)
       }
     })
+    req.files = files
     superagent.post('https://trello.com/1/cards?key=' +
           process.env.TRELLO_KEY + '&token=' +
            req.headers.authorization).send(card).end((err, _res) => {
       if (err) {
         return next(err)
       }
-      res.end()
+      req.id = _res.body.id
+      next()
+      // res.end()
     })
   })
+
+  router.post('', (req, res, next) => {
+    if (req.files.length >= 1) {
+      req.files.map((file, key) => {
+        file.id = req.id
+        superagent.post('https://trello.com/1/cards/' + req.id +
+       '/attachments?key=' + process.env.TRELLO_KEY +
+       '&token=' + req.headers.authorization)
+          .send(file).end()
+      })
+    }
+    res.end()
+  })
+
   app.use('/answers', router)
 }
