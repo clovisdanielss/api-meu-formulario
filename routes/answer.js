@@ -41,6 +41,7 @@ module.exports = (app, db) => {
 
   **/
   router.post('', (req, res, next) => {
+    res.end()
     const answers = req.body.answers
     const idUser = req.body.idUser.toString()
     var files = []
@@ -71,11 +72,12 @@ module.exports = (app, db) => {
 
         fs.writeFile(path.join('public', idUser, name), b, (err) => {
           if (err) {
-            return next(err)
+            return console.error(err)
           } else {
             console.log('Arquivo salvo')
           }
         })
+
         files.push({
           url: process.env.THIS + '/' + path.join(idUser, name),
           name: name
@@ -88,10 +90,10 @@ module.exports = (app, db) => {
           process.env.TRELLO_KEY + '&token=' +
            req.headers.authorization).send(card).end((err, _res) => {
       if (err) {
-        return next(err)
+        return console.error(err)
       }
       req.id = _res.body.id
-      next()
+      console.error()
       // res.end()
     })
   })
