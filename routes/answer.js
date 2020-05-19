@@ -57,7 +57,7 @@ module.exports = (app, db) => {
     app.mkdir(path.join('public', idUser))
     var card = {
       idList: req.body.idList,
-      name: req.body.answers[0].title,
+      name: req.body.answers[0].value,
       desc: '',
       due: null,
       pos: 'top'
