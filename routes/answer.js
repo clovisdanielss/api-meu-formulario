@@ -41,7 +41,7 @@ module.exports = (app, db) => {
 
   **/
   router.post('', (req, res, next) => {
-    res.end()
+    res.status('200').send()
     const answers = req.body.answers
     const idUser = req.body.idUser.toString()
     var files = []
