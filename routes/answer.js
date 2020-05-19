@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const url = require('url')
+const crypto = require('crypto')
 const fs = require('fs')
 const superagent = require('superagent')
 const userModel = require('../models/user')
@@ -59,7 +59,10 @@ module.exports = (app, db) => {
       } else if (answer.type === 'date') {
         card.due = new Date(answer.value)
       } else {
-        var name = answer.value.name
+        var name = crypto.randomBytes(4).toString('hex')
+        var arr = answer.value.name.split('.')
+        var ext = '.' + arr[arr.length - 1]
+        name += ext
         var b = Buffer.from(answer.value.data)
         fs.writeFile(path.join('public', name), b, (err) => {
           if (err) {
@@ -68,7 +71,7 @@ module.exports = (app, db) => {
             console.log('Arquivo salvo')
           }
         })
-        card.urlSource = process.env.THIS + name
+        card.urlSource = path.join(process.env.THIS, name)
       }
     })
     console.log('Card: ', card)
