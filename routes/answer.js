@@ -72,6 +72,7 @@ module.exports = (app, db) => {
 
         fs.writeFile(path.join('public', idUser, name), b, (err) => {
           if (err) {
+            console.log(err)
             return next(err)
           } else {
             console.log('Arquivo salvo')

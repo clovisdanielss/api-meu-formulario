@@ -13,8 +13,10 @@ dotenv.config()
 app.mkdir = (path) => {
   fs.mkdir(path, (err) => {
     if (err) {
+      console.log(path)
       console.log('Diretório já existe!')
     } else {
+      console.log(path)
       console.log('Diretório de usuário criado!')
     }
   })
