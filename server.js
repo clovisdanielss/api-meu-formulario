@@ -22,7 +22,6 @@ app.mkdir = (path) => {
   })
 }
 
-console.log(__dirname)
 app.use(express.static(path.join(__dirname, 'public')))
 app.PORT = process.env.PORT || 8080
 app.URL = process.env.URI
@@ -36,12 +35,10 @@ const sequelize = new Sequelize(process.env.URL + '?ssl=require',
     timezone: '-06:00'
   })
 
-// middlewares
-// app.use(cors({
-//   origin: ['http://localhost:3000', 'https://meu-formulario.herokuapp.com']
-// }))
-
-app.use(cors())
+// middlwares
+app.use(cors({
+  origin: ['http://localhost:3000', 'https://meu-formulario.herokuapp.com', 'https://trello.com']
+}))
 
 app.use(bp.urlencoded({ extended: true, limit: '10mb' }))
 app.use(bp.json({ limit: '10mb' }))
