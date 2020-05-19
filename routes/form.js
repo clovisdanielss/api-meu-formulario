@@ -10,6 +10,18 @@ module.exports = (app, db) => {
   const Component = componentModel(db)
   const Question = questionModel(db)
 
+  // Checa se existe autorização somente para user/:id/forms
+  router.all('*', (req, res, next) => {
+    if (req.method === 'GET' ||
+      (req.headers && req.headers.authorization)) {
+      next()
+    } else {
+      const err = new Error('Sem autorização')
+      err.status = 300
+      next(err)
+    }
+  })
+
   router.get('(/:id)?', (req, res, next) => {
     const query = req.query
     if (!req.userParams || (query && query.full && req.params.id)) {
@@ -31,7 +43,8 @@ module.exports = (app, db) => {
     next()
   })
 
-  // Deveria passar o link como query
+  // Deveria passar o link como query.
+  // Esse é o único método de /forms
   router.get('/:link', (req, res, next) => {
     const dbQuery = { link: req.params.link }
     Form.findOne({ where: dbQuery })
@@ -81,17 +94,6 @@ module.exports = (app, db) => {
       }).catch((err) => {
         next(err)
       })
-  })
-
-  // Checa se existe autorização
-  router.post('', (req, res, next) => {
-    if (req.headers && req.headers.authorization) {
-      next()
-    } else {
-      const err = new Error('Sem autorização')
-      err.status = 300
-      next(err)
-    }
   })
 
   // Post e delete dividido em três parte, serviço começa deletando
@@ -145,17 +147,6 @@ module.exports = (app, db) => {
     }).catch((err) => {
       next(err)
     })
-  })
-
-  // Checa se existe autorização
-  router.delete('/:id', (req, res, next) => {
-    if (req.headers && req.headers.authorization) {
-      next()
-    } else {
-      const err = new Error('Sem autorização')
-      err.status = 300
-      next(err)
-    }
   })
 
   router.delete('/:id', (req, res, next) => {

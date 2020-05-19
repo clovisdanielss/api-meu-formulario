@@ -5,10 +5,12 @@ const app = express()
 const dotenv = require('dotenv')
 const bp = require('body-parser')
 const router = require('./routes/router')
+const path = require('path')
 
 // Reading .env file
 dotenv.config()
 
+app.use(express.static(path.join(__dirname, 'public')))
 app.PORT = process.env.PORT || 8080
 app.URL = process.env.URI
 // form deve ter um email vinculado TRELLO
@@ -22,9 +24,14 @@ const sequelize = new Sequelize(process.env.URL + '?ssl=require',
   })
 
 // middlewares
+// app.use(cors({
+//   origin: ['http://localhost:3000', 'https://meu-formulario.herokuapp.com']
+// }))
+
 app.use(cors())
-app.use(bp.urlencoded({ extended: true }))
-app.use(bp.json())
+
+app.use(bp.urlencoded({ extended: true, limit: '10mb' }))
+app.use(bp.json({ limit: '10mb' }))
 router(app, sequelize)
 
 sequelize.authenticate().then(() => {

@@ -1,8 +1,11 @@
 const express = require('express')
 const router = express.Router()
-const request = require('request')
+const url = require('url')
+const fs = require('fs')
 const superagent = require('superagent')
 const userModel = require('../models/user')
+const path = require('path')
+
 module.exports = (app, db) => {
   const User = userModel(db)
 
@@ -39,7 +42,6 @@ module.exports = (app, db) => {
   **/
   router.post('', (req, res, next) => {
     const answers = req.body.answers
-    console.log('RespostaS: ', answers)
     var card = {
       idList: req.body.idList,
       name: req.body.title,
@@ -48,14 +50,25 @@ module.exports = (app, db) => {
     }
     var lastQuestion = ''
     answers.map((answer) => {
-      if (answer.type !== 'date') {
+      if (answer.type !== 'date' && answer.type !== 'file') {
         if (lastQuestion !== answer.titleQuestion) {
           card.desc += '\n' + answer.titleQuestion + '\n'
           lastQuestion = answer.titleQuestion
         }
         card.desc += answer.value + '. '
-      } else {
+      } else if (answer.type === 'date') {
         card.due = new Date(answer.value)
+      } else {
+        var name = answer.value.name
+        var b = Buffer.from(answer.value.data)
+        fs.writeFile(path.join('public', name), b, (err) => {
+          if (err) {
+            return next(err)
+          } else {
+            console.log('Arquivo salvo')
+          }
+        })
+        card.urlSource = process.env.THIS + name
       }
     })
     console.log('Card: ', card)
@@ -63,9 +76,8 @@ module.exports = (app, db) => {
           process.env.TRELLO_KEY + '&token=' +
            req.headers.authorization).send(card).end((err, _res) => {
       if (err) {
-        next(err)
+        return next(err)
       }
-      console.log(_res)
       res.end()
     })
   })
