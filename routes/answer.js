@@ -57,13 +57,14 @@ module.exports = (app, db) => {
     app.mkdir(path.join('public', idUser))
     var card = {
       idList: req.body.idList,
-      name: req.body.title,
+      name: req.body.answers[0].title,
       desc: '',
       due: null,
       pos: 'top'
     }
     var lastQuestion = ''
-    answers.map((answer, key) => {
+    for (let i = 1; i < answers.length; i++) {
+      const answer = answers[i]
       if (answer.type !== 'date' && answer.type !== 'file') {
         if (lastQuestion !== answer.titleQuestion) {
           card.desc += '\n**' + answer.titleQuestion + '**\n'
@@ -83,7 +84,7 @@ module.exports = (app, db) => {
           name: name
         })
       }
-    })
+    }
     req.files = files
     superagent.post('https://trello.com/1/cards?key=' +
           process.env.TRELLO_KEY + '&token=' +

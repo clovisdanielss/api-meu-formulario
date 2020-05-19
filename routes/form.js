@@ -60,7 +60,7 @@ module.exports = (app, db) => {
 
   router.get('/:link', (req, res, next) => {
     const dbQuery = { idForm: req.form.id }
-    Question.findAll({ where: dbQuery })
+    Question.findAll({ where: dbQuery, order: [['id', 'ASC']] })
       .then((foundQuestions) => {
         var questions = []
         var questionsIds = []
