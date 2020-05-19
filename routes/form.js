@@ -107,6 +107,7 @@ module.exports = (app, db) => {
       var questions = []
       req.body.questions.map((question) => {
         question.idForm = createdForm.dataValues.id
+        question.id = undefined
         questions.push(question)
       })
       req.formResponse = {
@@ -129,6 +130,7 @@ module.exports = (app, db) => {
       createdQuestions.map((createdQuestion, key) => {
         questions[key].components.map((component) => {
           component.idQuestion = createdQuestion.dataValues.id
+          component.id = undefined
           components.push(component)
         })
       })

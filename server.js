@@ -6,9 +6,19 @@ const dotenv = require('dotenv')
 const bp = require('body-parser')
 const router = require('./routes/router')
 const path = require('path')
-
+const fs = require('fs')
 // Reading .env file
 dotenv.config()
+
+app.mkdir = (path) => {
+  fs.mkdir(path, (err) => {
+    if (err) {
+      console.log('Diretório já existe!')
+    } else {
+      console.log('Diretório de usuário criado!')
+    }
+  })
+}
 
 app.use(express.static(path.join(__dirname, 'public')))
 app.PORT = process.env.PORT || 8080

@@ -42,20 +42,25 @@ module.exports = (app, db) => {
   **/
   router.post('', (req, res, next) => {
     const answers = req.body.answers
+    const idUser = req.body.idUser.toString()
+    app.mkdir(path.join('public', idUser))
     var card = {
       idList: req.body.idList,
       name: req.body.title,
       desc: '',
-      due: null
+      due: null,
+      pos: 'top'
     }
     var lastQuestion = ''
-    answers.map((answer) => {
+    answers.map((answer, key) => {
       if (answer.type !== 'date' && answer.type !== 'file') {
         if (lastQuestion !== answer.titleQuestion) {
-          card.desc += '\n' + answer.titleQuestion + '\n'
+          card.desc += '\n**' + answer.titleQuestion + '**\n'
           lastQuestion = answer.titleQuestion
+          card.desc += answer.value
+        } else {
+          card.desc += ' - ' + answer.value
         }
-        card.desc += answer.value + '. '
       } else if (answer.type === 'date') {
         card.due = new Date(answer.value)
       } else {
@@ -64,17 +69,17 @@ module.exports = (app, db) => {
         var ext = '.' + arr[arr.length - 1]
         name += ext
         var b = Buffer.from(answer.value.data)
-        fs.writeFile(path.join('public', name), b, (err) => {
+
+        fs.writeFile(path.join('public', idUser, name), b, (err) => {
           if (err) {
             return next(err)
           } else {
             console.log('Arquivo salvo')
           }
         })
-        card.urlSource = process.env.THIS + '/' + name
+        card.urlSource = process.env.THIS + '/' + path.join(idUser, name)
       }
     })
-    console.log('Card: ', card)
     superagent.post('https://trello.com/1/cards?key=' +
           process.env.TRELLO_KEY + '&token=' +
            req.headers.authorization).send(card).end((err, _res) => {

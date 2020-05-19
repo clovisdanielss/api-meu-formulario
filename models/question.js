@@ -16,6 +16,9 @@ module.exports = (sequelize) => {
     },
     title: {
       type: Sequelize.STRING
+    },
+    required: {
+      type: Sequelize.BOOLEAN
     }
   }, {
     timestamps: false,
