@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const crypto = require('crypto')
 const fs = require('fs')
 const superagent = require('superagent')
 const userModel = require('../models/user')
@@ -21,16 +22,6 @@ module.exports = (app, db) => {
         next(err)
       })
   })
-
-  async function createFiles (idUser, name, b) {
-    fs.writeFile(path.join('public', idUser, name), b, (err) => {
-      if (err) {
-        return console.error(err)
-      } else {
-        console.log('Arquivo salvo')
-      }
-    })
-  }
   /**
 
   Uma resposta de formulário será da forma:
@@ -50,7 +41,6 @@ module.exports = (app, db) => {
 
   **/
   router.post('', (req, res, next) => {
-    res.status('200').send()
     const answers = req.body.answers
     const idUser = req.body.idUser.toString()
     var files = []
@@ -76,8 +66,17 @@ module.exports = (app, db) => {
         card.due = new Date(answer.value)
       } else {
         const name = answer.value.name.toLowerCase()
+
         var b = Buffer.from(answer.value.data)
-        createFiles(idUser, name, b)
+
+        fs.writeFile(path.join('public', idUser, name), b, (err) => {
+          if (err) {
+            return console.error(err)
+          } else {
+            console.log('Arquivo salvo')
+          }
+        })
+
         files.push({
           url: process.env.THIS + '/' + path.join(idUser, name),
           name: name
