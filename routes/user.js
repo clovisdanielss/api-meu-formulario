@@ -5,6 +5,17 @@ const userModel = require('../models/user')
 module.exports = (app, db) => {
   const User = userModel(db)
 
+  router.all('', (req, res, next) => {
+    if (req.headers && req.headers.authorization &&
+      req.headers.authorization === process.env.TRELLO_KEY) {
+      return next()
+    }
+    const err = Error()
+    err.message = 'Faltando chave api'
+    err.status = 300
+    next(err)
+  })
+
   // Encaminhamento de parametros
   router.all('/:id/*', (req, res, next) => {
     req.userParams = req.params
@@ -26,6 +37,7 @@ module.exports = (app, db) => {
       next(err)
     })
   })
+
   // Salva um usuário
   router.post('', (req, res, next) => {
     User.create(req.body).then((createdUser) => {
