@@ -32,6 +32,15 @@ module.exports = (app, db) => {
       }
     })
   }
+
+  function searchFor (answers, string) {
+    for (let i = 0; i < answers.length; i++) {
+      if (answers[i].titleQuestion === string) {
+        return answers[i].value
+      }
+    }
+  }
+
   /**
 
   Uma resposta de formulário será da forma:
@@ -57,13 +66,13 @@ module.exports = (app, db) => {
     app.mkdir(path.join('public', idUser))
     var card = {
       idList: req.body.idList,
-      name: req.body.answers[0].value,
+      name: searchFor(answers, 'Nome da Postagem'),
       desc: '',
       due: null,
       pos: 'top'
     }
     var lastQuestion = ''
-    for (let i = 1; i < answers.length; i++) {
+    for (let i = 0; i < answers.length; i++) {
       const answer = answers[i]
       if (answer.type !== 'date' && answer.type !== 'file') {
         if (lastQuestion !== answer.titleQuestion) {
