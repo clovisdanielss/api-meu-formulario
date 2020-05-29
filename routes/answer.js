@@ -94,6 +94,7 @@ module.exports = (app, db) => {
         })
       }
     }
+    console.log('New card: ', card)
     req.files = files
     superagent.post('https://trello.com/1/cards?key=' +
           process.env.TRELLO_KEY + '&token=' +
