@@ -5,6 +5,10 @@ const fs = require('fs')
 const superagent = require('superagent')
 const userModel = require('../models/user')
 const path = require('path')
+const AWS = require('aws-sdk')
+AWS.config.update({
+  region:'sa-east-1'
+})
 
 module.exports = (app, db) => {
   const User = userModel(db)
@@ -24,12 +28,15 @@ module.exports = (app, db) => {
   })
 
   async function createFiles (idUser, name, b) {
-    fs.writeFile(path.join('public', idUser, name), b, (err) => {
-      if (err) {
-        return console.error(err)
-      } else {
-        console.log('Arquivo salvo')
-      }
+    const s3 = new AWS.S3()
+    let bucketParams = {
+      Bucket:"bucket-meu-formulario",
+      ACL : "public-read",
+      Body : b,
+      Key : "public/" + path.join(idUser, name)
+    }
+    s3.upload(bucketParams,(err,data)=>{
+      console.log(err,data)
     })
   }
 
@@ -89,8 +96,9 @@ module.exports = (app, db) => {
         var b = Buffer.from(answer.value.data)
         createFiles(idUser, name, b)
         files.push({
-          url: process.env.THIS + '/' + path.join(idUser, name),
-          name: name
+          url: process.env.STATIC + '/' + path.join(idUser, name),
+          name: name,
+          mimeType:answer.value.mimeType
         })
       }
     }
